@@ -12,12 +12,14 @@ describe 'tomcat::install_systemd' do
     'centos' => '7.2.1511'
   }.each do |os, v|
     context "When all attributes are default, on #{os.capitalize} #{v}" do
+
+      let(:user) { 'tomcat' }
+      let(:template) { chef_run.template('/etc/systemd/system/tomcat.service') }
+      let(:users_file) { '/opt/tomcat/conf/tomcat-users.xml' }
+
       let(:chef_run) do
         ChefSpec::SoloRunner.new(platform: os, version: v).converge(described_recipe)
       end
-
-      let(:template) { chef_run.template('/etc/systemd/system/tomcat.service') }
-      let(:users_file) { '/opt/tomcat/conf/tomcat-users.xml' }
 
       it 'converges successfully' do
         expect { chef_run }.to_not raise_error
@@ -39,8 +41,8 @@ describe 'tomcat::install_systemd' do
 
       it 'creates the tomcat-users.xml file' do
         expect(chef_run).to create_file(users_file).with(
-          user: 'tomcat',
-          owner: 'tomcat',
+          user: user,
+          owner: user,
           mode: '0744'
         )
       end
